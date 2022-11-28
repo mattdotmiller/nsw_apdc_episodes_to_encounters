@@ -14,8 +14,8 @@ With advice from _Blanca Gallego, Louisa Jorm_ and _Dami Sotade_
 
   
 
-The admitted patient data collection (APDC) contains patient care episodes rather than admissions. An admission needs to be created by combining the appropriate patient care episodes. There are a number of fields that could be helpful in determining when the end of a patient care episode corresponds to the end of an admission, for example 'mode of separation' is recorded as "Discharged by Hospital". Unfortunately, the documentation of a "Discharge" is not always helpful. For example,
-patients can be transferred between hospitals but are recorded as "Discharged from Hospital" on transfer although their inpatient episode continues as a second hospital. Patients on renal dialysis are always documented as being discharged from hospital at the end of their dialysis treatment, even if they are an inpatient. In addition, some multiple-day episodes are nested parts of longer admissions and need to be counted as such.
+The admitted patient data collection (APDC) contains patient care episodes rather than admissions or encounters. An encounter needs to be created by combining the appropriate patient care episodes. There are a number of fields that could be helpful in determining when the end of a patient care episode corresponds to the end of an encounter, for example 'mode of separation' is recorded as "Discharged by Hospital". Unfortunately, the documentation of a "Discharge" is not always helpful. For example,
+patients can be transferred between hospitals but are recorded as "Discharged from Hospital" on transfer although their inpatient episode continues at a second hospital. Patients on renal dialysis are always documented as being discharged from hospital at the end of their dialysis treatment, even if they are an inpatient. In addition, some multiple-day episodes are nested parts of longer encounters and need to be counted as such.
 
   
 
