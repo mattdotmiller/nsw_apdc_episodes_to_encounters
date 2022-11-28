@@ -4,13 +4,13 @@ _Matthew Miller_
 
   
 
-With advice from _Blanca Gallego, Louisa Jorm_ and Dami Sotade
+With advice from _Blanca Gallego, Louisa Jorm_ and _Dami Sotade_
 
   
 
   
 
-Overview
+**Overview**
 
   
 
@@ -24,7 +24,7 @@ APDC data used to prepare this code was supported by a NSW Institute of Trauma a
 
   
 
-Approach used here
+**Approach used here**
 
   
 
@@ -95,7 +95,7 @@ The new variables created in this process are put back into the APDC. Also repla
 
   
 
-The new fields are:
+**The new fields are:**
 
 | Variable | Notes |
 | ---| --- |
