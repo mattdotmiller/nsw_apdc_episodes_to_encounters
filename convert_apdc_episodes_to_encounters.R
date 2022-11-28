@@ -113,17 +113,7 @@ make_enounters <- function(x) {
   
   
   create_inpatient_outpatient <- function(y) {
-    
-    #test ppns
-    #ppn_single <- "PPN000000290092"
-    #ppn_single <- "PPN000000421438"
-    #ppn_single<- "PPN000000649159"
-    #ppn_single<- "PPN000000471609"
-    #ppn_single<- "PPN000000000034"
-    #ppn_single<- "PPN000000042361"
-    #ppn_single<- "PPN000000482608"
-    #ppn_single<- "PPN000000687585"
-    
+   
     
     
     
