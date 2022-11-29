@@ -109,7 +109,7 @@ make_enounters <- function(x) {
   group_length <- max(cycle_ppns)
   
   
-  print(str_c("processing ppns to inpatient/outpatent status and admission sequence for group", x, "of", group_length, "at", time_stamp_1, sep=" "))
+  print(str_c("processing ppns to inpatient/outpatent status and encounter sequence for group", x, "of", group_length, "at", time_stamp_1, sep=" "))
   
   
   create_inpatient_outpatient <- function(y) {
@@ -270,7 +270,7 @@ make_enounters <- function(x) {
     
     
     # the following loop runts the correction below the same number of times as their are rows. 
-    #This allows multiple checks of the correction to the admission
+    #This allows multiple checks of the correction to the encounter
     for (i in 1:nrow(apdc_enctr)) { 
       
       
@@ -280,13 +280,13 @@ make_enounters <- function(x) {
             
             z <- overlaps_with[x] #record the item it overlaps with
             
-            y <- apdc_enctr[[z,"enctr"]] # record the admisson of the overlapped item
+            y <- apdc_enctr[[z,"enctr"]] # record the encounter of the overlapped item
             
-            apdc_enctr[x,"enctr"] <- y #assign that admission to this row
+            apdc_enctr[x,"enctr"] <- y #assign that encounter to this row
             
           } else { 
             
-            enctr[x] <- enctr[x] #if no overlap then the admisson remains the same 
+            enctr[x] <- enctr[x] #if no overlap then the encounter remains the same 
             
           }
         }))
@@ -351,7 +351,7 @@ out <- split(ppns, cut(seq_along(ppns),chunk_no,labels = FALSE))
 
 cycle_ppns <- 1:500
 
-#run the make_admissions function
+#run the make_encounters function
 apdc_enctr_list <- map(cycle_ppns, make_encounters)
 
 # reduce the function output to dataframe
