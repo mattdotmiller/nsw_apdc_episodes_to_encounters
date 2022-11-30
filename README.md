@@ -33,7 +33,7 @@ Rather than using specific character fields describing modes of separation or tr
 
   
 
-This approach is consistent with the naming conventions outlined in [Vallmuur K, McCreanor V, Cameron C, et al. Inj Prev 2021;27:479–489](https://injuryprevention.bmj.com/content/27/5/479) where an _Episode_ is the discrete unit of activity for a patient, and also referred to as a separation. Separations may include discharge, transfer or death, or ‘statistical’ separations such as episode type changes). An _Encounter_ is made up of contiguous episodes of care. This can include episodes between health services so long as they are related temporally. Episodes usually have no more than 24–48 hours between them (in other words, depending on the data you can allow 24-48 hours between episodes and include them in the same encounter.
+This approach is consistent with the naming conventions outlined in [Vallmuur K, McCreanor V, Cameron C, et al. Inj Prev 2021;27:479–489](https://injuryprevention.bmj.com/content/27/5/479) where an _Episode_ is the discrete unit of activity for a patient, and also referred to as a separation. Separations may include discharge, transfer or death, or ‘statistical’ separations such as episode type changes). An _Encounter_ is made up of contiguous episodes of care. This can include episodes between health services so long as they are related temporally. Episodes usually have no more than 24–48 hours between them (in other words, depending on the data you can allow 24-48 hours between episodes and include them in the same encounter). In the script 12 hours is used, but this can be adjusted to your preference. 
 
   
 
