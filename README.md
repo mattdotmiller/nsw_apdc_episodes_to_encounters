@@ -1,4 +1,4 @@
-# Processing New South Wales (Australia) Admitted Patient Data to Create Encounters from Episodes
+# Grouping Episodes of Care into Patients Encounters for the New South Wales Admitted Patient Data Collection (APDC)
 
 _Matthew Miller_
 
