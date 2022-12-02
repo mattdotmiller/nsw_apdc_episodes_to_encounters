@@ -1,4 +1,4 @@
-# Grouping Episodes of Care into Patients Encounters for the New South Wales Admitted Patient Data Collection (APDC)
+# Grouping Episodes of Care into Patient Encounters for the New South Wales Admitted Patient Data Collection (APDC)
 
 _Matthew Miller_
 
