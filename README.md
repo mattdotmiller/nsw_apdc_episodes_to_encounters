@@ -8,6 +8,9 @@ With advice from _Blanca Gallego, Louisa Jorm_ and _Dami Sotade_
 
   
 
+**APDC data used to prepare this code was supported by a NSW Institute of Trauma and Management (ITIM) Grant**
+
+For the details of that project see: [https://osf.io/63qc7/](https://osf.io/63qc7/)
   
 
 **Overview**
@@ -16,12 +19,6 @@ With advice from _Blanca Gallego, Louisa Jorm_ and _Dami Sotade_
 
 The admitted patient data collection (APDC) contains patient care episodes rather than admissions or encounters. An encounter needs to be created by combining the appropriate patient care episodes. There are a number of fields that could be helpful in determining when the end of a patient care episode corresponds to the end of an encounter, for example 'mode of separation' is recorded as "Discharged by Hospital". Unfortunately, the documentation of a "Discharge" is not always helpful. For example,
 patients can be transferred between hospitals but are recorded as "Discharged from Hospital" on transfer although their inpatient episode continues at a second hospital. Patients on renal dialysis are always documented as being discharged from hospital at the end of their dialysis treatment, even if they are an inpatient. In addition, some multiple-day episodes are nested parts of longer encounters and need to be counted as such.
-
-  
-
-**APDC data used to prepare this code was supported by a NSW Institute of Trauma and Management (ITIM) Grant**
-
-For the details of that project see: [https://osf.io/63qc7/](https://osf.io/63qc7/)
 
   
 
@@ -70,7 +67,7 @@ This function takes each PPN and creates the encounters
 *   create a second column that returns the smallest row number of the overlap of episode periods. This is used to join up the overlapping episodes later
 *   create a "same as next column" that returns yes or no according to whether the episodes are recorded as overlapping with each other, if there are less than 12-hours between episodes, if the patient was transferred out to an out-of-state hospital or transferred back in, or if they were discharged to a palliative care unit or psychiatric hospital
 *   create a column that increments the encounter-episodes based on whether the next episode is the same as the previous (no increment) or not. In the script this is inverted.
-*   after encountersnare created, adjust them for episodes that overlap by are not contiguous (eg an inpatient episode that is 3-4 rows away)
+*   after encounters are created, adjust them for episodes that overlap but are not contiguous (eg an inpatient episode that is 3-4 rows away)
 *   correct encounter number so they are sequential
 *   create encounter periods, episode numbers per encounter, and a unique encounter id (enctr\_id) that can be used for grouped transformations later.
 
