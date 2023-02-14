@@ -116,9 +116,10 @@ make_encounters <- function(x) {
    
     
     
+    ppn_single <- y
     
     #write a message regarding progress - currently disabled
-    #ppn_single <- y
+   
     #total_ppn <- length(ppn1)
     #loctn_of_ppn <- which(ppn_single == ppn1)
     #percent_complete_full = (loctn_of_ppn / total_ppn)*100
