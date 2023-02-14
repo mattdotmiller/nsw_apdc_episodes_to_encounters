@@ -99,7 +99,7 @@ out_of_apdc_facilities <- as.vector(out_of_apdc_facilities$hosp)
 # APDC step 3 the make enctrs function-------------------------------------------------------------
 
 
-make_enounters <- function(x) {
+make_encounters <- function(x) {
   
   
   
@@ -117,15 +117,15 @@ make_enounters <- function(x) {
     
     
     
-    #write a message regarding progress
-    ppn_single <- y
-    total_ppn <- length(ppn1)
-    loctn_of_ppn <- which(ppn_single == ppn1)
-    percent_complete_full = (loctn_of_ppn / total_ppn)*100
-    percent_complete = round(percent_complete_full, digits=3)
+    #write a message regarding progress - currently disabled
+    #ppn_single <- y
+    #total_ppn <- length(ppn1)
+    #loctn_of_ppn <- which(ppn_single == ppn1)
+    #percent_complete_full = (loctn_of_ppn / total_ppn)*100
+    #percent_complete = round(percent_complete_full, digits=3)
     #writeLines(str_c("processing ppn",loctn_of_ppn, "of",total_ppn, "from group",x , "at", now(), sep=" "))
     #writeLines(str_c(percent_complete, "% complete", sep=" "))
-    time_stamp_1 <- now()
+    #time_stamp_1 <- now()
     
     #process the ppns
     apdc_enctr_single <- apdc_raw%>%
@@ -249,8 +249,8 @@ make_enounters <- function(x) {
       mutate(item_no = row_number()) %>%
       mutate(lag_dist = item_no - overlaps_with) %>%
       mutate(same_as_next = case_when(
-        overlaps_with == lead(item_no) | incriment_int <12 ~ "yes",
-        lead(mode_separation_chr) ==  "Transfer to other Hospital" & !(facility_trans_to_chr %in% out_of_apdc_facilities) & facility_identifier_chr == facility_trans_from_chr ~ "yes",
+        overlaps_with == lead(item_no) | incriment_int <24 ~ "yes",
+        lead(mode_separation_chr) ==  "Transfer to other Hospital" & !(facility_trans_to_chr %in% out_of_apdc_facilities) & facility_identifier_chr == lead(facility_trans_from_chr) ~ "yes",
         lead(facility_trans_to_chr) %in% out_of_apdc_facilities & facility_trans_from_chr %in% out_of_apdc_facilities ~ "yes",# takes into account patients out and back in to NSW
         lead(mode_separation_chr) %in% c("Transfer to Palliative Care Unit / Hospice", "Transfer to Public Psychiatric Hospital") ~ "yes",
         !is.na(lead(drg_mode_separation_chr)) ~ "no",
