@@ -165,14 +165,14 @@ make_encounters <- function(x) {
       group_by(episode_start_dtg) %>%
       summarise(start_in_pds = sum(start_in_pd)) %>%
       ungroup() %>%
-      left_join(overnight_start_mtrx, by = "episode_start_dtg") %>%
+      left_join(overnight_start_mtrx, by = "episode_start_dtg", multiple = "all") %>%
       filter(start_in_pds >=2)  %>%
       filter(start_in_pd == 1) %>%
       group_by(episode_pd) %>%
       filter(episode_start_dtg == int_start(episode_pd)) %>%
       ungroup() %>%
       inner_join(apdc_enctr_single, by  = c("episode_start_dtg", "episode_pd")) %>%
-      mutate(inpatient_outpatient = "episode in overnight pd") %>%
+      mutate(inpatient_outpatient = "episode in overnight pd", multiple = "all") %>%
       select(-start_in_pds)
     
     overnight_end_mtrx <- apdc_enctr_single %>%
@@ -183,13 +183,13 @@ make_encounters <- function(x) {
       group_by(episode_end_dtg) %>%
       summarise(end_in_pds = sum(end_in_pd)) %>%
       ungroup() %>%
-      left_join(overnight_end_mtrx, by = "episode_end_dtg") %>%
+      left_join(overnight_end_mtrx, by = "episode_end_dtg", multiple = "all") %>%
       filter(end_in_pds >1) %>%
       filter(end_in_pd == 1) %>%
       group_by(episode_pd) %>%
       filter(episode_end_dtg == int_end(episode_pd)) %>%
       ungroup() %>%
-      inner_join(apdc_enctr_single, by  = c("episode_end_dtg", "episode_pd")) %>%
+      inner_join(apdc_enctr_single, by  = c("episode_end_dtg", "episode_pd", multiple = "all")) %>%
       mutate(inpatient_outpatient = "episode in overnight pd")%>%
       select(-end_in_pds)
     
@@ -371,7 +371,7 @@ saveRDS(apdc_enctr, "apdc_enctr_only.RDS")
 
 #join the encounters dataframe to the APDC dataset
 apdc <- apdc_raw %>%
-  left_join(apdc_enctr, by = c("ppn", "recnum"))
+  left_join(apdc_enctr, by = c("ppn", "recnum"), multiple = "all")
 
 
 saveRDS(apdc, file = "apdc_with_enctrs.RDS")
