@@ -59,9 +59,9 @@ This approach is consistent with the naming conventions outlined in [Vallmuur K
 
 This function takes each PPN and creates the encounters
 
-  
+Line 280 pets you set the time window for which two sequential episodes can be considered part of the same encounter. 
 
-*   creating a column named "inpatient outpatient" that uses overlapping time periods and duration of stay to estimate if the episode is an overnight stay (1+ nights), an overnight episode that was part of a longer overnight stay, a day stay episode during a longer overnight admission, or a day stay episode. This column is not used in future calculations but is useful when reviewing the data to see a possible reason why an episode may have been subsequently classified as part of a longer encounter or not.
+ 
 *   create a column that displays the time interval between an episode and the previous episode, in hours (called incriment\_int)
 *   create a column that returns whether an episode period overlaps with the episode period of another episode
 *   create a second column that returns the smallest row number of the overlap of episode periods. This is used to join up the overlapping episodes later
@@ -99,7 +99,6 @@ The new variables created in this process are put back into the APDC. Also repla
 | ---| --- |
 | episode\_end\_dtg | created from episode start DTG + (24 \* episode days LOS ) or (+ hours day stay length of stay) |
 | episode\_pd | episode start DTG %--% episode end DTG |
-| inpatient\_outpatient | overnight, episode in overnight period, day stay as inpatient or day stay. Explained above |
 | enctr | encounter number per PPN |
 | enctr\_episode | consecutive episode number as part of each encounter |
 | enctr\_id | unique code for each encountr |
