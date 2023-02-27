@@ -109,24 +109,14 @@ make_encounters <- function(x) {
   group_length <- max(cycle_ppns)
   
   
-  print(str_c("processing ppns to inpatient/outpatent status and encounter sequence for group", x, "of", group_length, "at", time_stamp_1, sep=" "))
+  print(str_c("processing ppns to admission and encounter sequence for group", x, "of", group_length, "at", time_stamp_1, sep=" "))
   
   
   create_inpatient_outpatient <- function(y) {
-   
     
     
     ppn_single <- y
     
-    #write a message regarding progress - currently disabled
-   
-    #total_ppn <- length(ppn1)
-    #loctn_of_ppn <- which(ppn_single == ppn1)
-    #percent_complete_full = (loctn_of_ppn / total_ppn)*100
-    #percent_complete = round(percent_complete_full, digits=3)
-    #writeLines(str_c("processing ppn",loctn_of_ppn, "of",total_ppn, "from group",x , "at", now(), sep=" "))
-    #writeLines(str_c(percent_complete, "% complete", sep=" "))
-    #time_stamp_1 <- now()
     
     #process the ppns
     apdc_enctr_single <- apdc_raw%>%
@@ -135,8 +125,10 @@ make_encounters <- function(x) {
       select(ppn, episode_start_date, episode_start_dtg, episode_length_of_stay, episode_day_stay_los_recode, unit_admission_chr, mode_separation_chr, recnum, facility_identifier_chr, facility_trans_to_chr, drg_mode_separation_chr, ed_status_chr,episode_of_care_type_chr, facility_trans_from_chr) %>%
       mutate(episode_los_hrs = if_else(episode_day_stay_los_recode == 0 | is.na(episode_day_stay_los_recode), episode_length_of_stay*24, episode_day_stay_los_recode, episode_length_of_stay*24)) %>%
       mutate(episode_end_dtg = episode_start_dtg + hours(episode_los_hrs)) %>%
-      mutate(episode_end_dtg = ymd_hm(str_c(as.character(as.Date(episode_end_dtg)), "23:59", sep = " "))) %>%
-      mutate(episode_pd = episode_start_dtg %--% episode_end_dtg) 
+      mutate(episode_end_extended = episode_end_dtg + hours(window_hrs)) %>%
+      #mutate(episode_end_dtg = ymd_hm(str_c(as.character(as.Date(episode_end_dtg)), "23:59", sep = " "))) %>%
+      mutate(episode_pd = episode_start_dtg %--% episode_end_dtg) %>%
+      mutate(episode_pd_extended = episode_start_dtg %--% episode_end_extended) 
     
     
     col_order <- c("ppn", "episode_start_date", "episode_start_dtg", "episode_length_of_stay", "episode_day_stay_los_recode", "unit_admission_chr",
@@ -144,103 +136,28 @@ make_encounters <- function(x) {
                    "episode_of_care_type_chr", "facility_trans_from_chr", "episode_los_hrs", "episode_end_dtg", "episode_pd","daystay_as_inp")
     
     
-    overnight <- apdc_enctr_single %>%
-      filter(episode_day_stay_los_recode == 0 | 
-               is.na(episode_day_stay_los_recode) | 
-               (episode_day_stay_los_recode >0 & unit_admission_chr == "Lodger / Boarder Beds")) %>%
-      mutate(inpatient_outpatient = "overnight")
-    
-    overnight_periods <- as.list(overnight$episode_pd)
-    over_night_recnum <- as.vector(overnight$recnum)
-    
-    
-    #separate out daystay procedures and non daystay
-    overnight_start_mtrx <- apdc_enctr_single %>%
-      expand(episode_start_dtg, episode_pd) %>%
-      mutate(start_in_pd = if_else(episode_start_dtg %within% episode_pd, 1,0, NA_real_)) 
-    
-    
-    
-    overnight_expanded_start <- overnight_start_mtrx%>%
-      group_by(episode_start_dtg) %>%
-      summarise(start_in_pds = sum(start_in_pd)) %>%
-      ungroup() %>%
-      left_join(overnight_start_mtrx, by = "episode_start_dtg", multiple = "all") %>%
-      filter(start_in_pds >=2)  %>%
-      filter(start_in_pd == 1) %>%
-      group_by(episode_pd) %>%
-      filter(episode_start_dtg == int_start(episode_pd)) %>%
-      ungroup() %>%
-      inner_join(apdc_enctr_single, by  = c("episode_start_dtg", "episode_pd")) %>%
-      mutate(inpatient_outpatient = "episode in overnight pd", multiple = "all") %>%
-      select(-start_in_pds)
-    
-    overnight_end_mtrx <- apdc_enctr_single %>%
-      expand(episode_end_dtg, episode_pd) %>%
-      mutate(end_in_pd = if_else(episode_end_dtg %within% episode_pd, 1,0, NA_real_)) 
-    
-    overnight_expanded_end <- overnight_end_mtrx %>%
-      group_by(episode_end_dtg) %>%
-      summarise(end_in_pds = sum(end_in_pd)) %>%
-      ungroup() %>%
-      left_join(overnight_end_mtrx, by = "episode_end_dtg", multiple = "all") %>%
-      filter(end_in_pds >1) %>%
-      filter(end_in_pd == 1) %>%
-      group_by(episode_pd) %>%
-      filter(episode_end_dtg == int_end(episode_pd)) %>%
-      ungroup() %>%
-      inner_join(apdc_enctr_single, by  = c("episode_end_dtg", "episode_pd", multiple = "all")) %>%
-      mutate(inpatient_outpatient = "episode in overnight pd")%>%
-      select(-end_in_pds)
-    
-    overnight <- overnight %>%
-      bind_rows(overnight_expanded_start, overnight_expanded_end) %>%
-      arrange(inpatient_outpatient) %>%
-      distinct(recnum, .keep_all = TRUE)
-    
-    
-    
-    overnight_periods <- as.list(overnight$episode_pd)
-    over_night_recnum <- as.vector(overnight$recnum)
-    
-    day_stay_as_ip <- apdc_enctr_single %>%
-      filter(!recnum %in% over_night_recnum) %>%
-      filter(episode_start_dtg %within% overnight_periods) %>%
-      mutate(inpatient_outpatient = "daystay_as_ip") %>%
-      relocate(any_of(col_order))
-    
-    day_stay_as_out_pt <- apdc_enctr_single %>%
-      filter(!recnum %in% over_night_recnum) %>%
-      filter(!episode_start_dtg %within% overnight_periods) %>%
-      mutate(inpatient_outpatient = "daystay")%>%
-      relocate(any_of(col_order))
-    
-    
-    apdc_enctr_single <- overnight %>%
-      bind_rows(day_stay_as_out_pt) %>%
-      bind_rows(day_stay_as_ip) 
-    
+   
     # updated code ------------------------------------------------------------
     
     
     apdc_enctr<- apdc_enctr_single %>%
-      arrange(desc(episode_end_dtg)) %>%
+      arrange(desc(episode_start_dtg)) %>%
       mutate(incriment_int = as.numeric(difftime(episode_start_dtg, lead(episode_end_dtg)), units="hours")) %>%
-      mutate(overlaps = map_lgl(seq_along(episode_pd), function(x){
+      mutate(overlaps = map_lgl(seq_along(episode_pd_extended), function(x){
         #Get all Int indexes other than the current one
-        y = setdiff(seq_along(episode_pd), x)
+        y = setdiff(seq_along(episode_pd_extended), x)
         #The interval overlaps with all other intervals
         #return(all(int_overlaps(Int[x], Int[y])))
         #The interval overlaps with any other intervals
-        return(any(int_overlaps(episode_pd[x], episode_pd[y])))
+        return(any(int_overlaps(episode_pd_extended[x], episode_pd_extended[y])))
       }))%>%
-      mutate(overlaps_with = map(seq_along(episode_pd), function(x){
+      mutate(overlaps_with = map(seq_along(episode_pd_extended), function(x){
         #Get all Int indexes other than the current one
-        y = (seq_along(episode_pd))
+        y = (seq_along(episode_pd_extended))
         #The interval overlaps with all other intervals
         #return(all(int_overlaps(Int[x], Int[y])))
         #The interval overlaps with any other intervals
-        return(which(int_overlaps(episode_pd[x], episode_pd[y])))
+        return(which(int_overlaps(episode_pd_extended[x], episode_pd_extended[y])))
       }))%>%
       unnest(overlaps_with) %>%
       group_by(episode_start_dtg) %>%
@@ -250,28 +167,31 @@ make_encounters <- function(x) {
       mutate(item_no = row_number()) %>%
       mutate(lag_dist = item_no - overlaps_with) %>%
       mutate(same_as_next = case_when(
-        overlaps_with == lead(item_no) | incriment_int <24 ~ "yes",
-        lead(mode_separation_chr) ==  "Transfer to other Hospital" & !(facility_trans_to_chr %in% out_of_apdc_facilities) & facility_identifier_chr == lead(facility_trans_from_chr) ~ "yes",
+        overlaps_with == lead(item_no) | incriment_int < window_hrs ~ "yes",
+        lead(mode_separation_chr) ==  "Transfer to other Hospital" & !(facility_trans_to_chr %in% out_of_apdc_facilities) & lead(facility_identifier_chr) == facility_trans_from_chr ~ "yes",
         lead(facility_trans_to_chr) %in% out_of_apdc_facilities & facility_trans_from_chr %in% out_of_apdc_facilities ~ "yes",# takes into account patients out and back in to NSW
         lead(mode_separation_chr) %in% c("Transfer to Palliative Care Unit / Hospice", "Transfer to Public Psychiatric Hospital") ~ "yes",
-        !is.na(lead(drg_mode_separation_chr)) ~ "no",
+        drg_mode_separation_chr %in% c("Discharge/transfer to (an)other acute hospital", "Discharge/transfer to (an)other psychiatric hospital", "Statistical discharge - type change",
+        "Discharge/transfer to (an)other psychiatric hospital", "Discharge/transfer to other health care accommodation (includes mothercraft hospitals)") ~ "yes", #these are statistical discharges or ones that go to hostels / welfare etc so may still be an inpatient
         TRUE ~ "no")) %>%
       mutate(incriment = case_when(
         same_as_next == "yes" ~ 0,
         same_as_next == "no" ~ 1))%>%
-      mutate(cum_inc = cumsum(incriment),
-             enctr = (sum(incriment)+1) - lag(cum_inc)) %>%
-      mutate(enctr = case_when(
-        is.na(enctr) & incriment == 1 ~lead(enctr)+1,
-        is.na(enctr) & incriment == 0 ~ lead(enctr),
+      mutate(cum_inc = cumsum(incriment), #add cumulative incriments
+             enctr = (sum(incriment)+1) - lag(cum_inc)) %>% #add an encounter number
+      mutate(num_of_rows = n()) %>% #count the number of rows, used below
+      mutate(enctr = case_when( #this corrects for NAs in the encounter number that tend to occur on the first or last episode
+        is.na(enctr) & incriment == 1 & num_of_rows > 1 ~ lead(enctr)+1,
+        is.na(enctr) & incriment == 0 & num_of_rows > 1 ~ lead(enctr),
+        is.na(enctr) & num_of_rows == 1 ~ 1,
         TRUE ~ enctr)) %>%
-      #mutate(enctr = if_else(is.na(enctr), 1, enctr, enctr)) %>%
+      select(-num_of_rows) %>%
       relocate(ppn, episode_start_dtg, episode_end_dtg, episode_length_of_stay, episode_day_stay_los_recode, facility_identifier_chr, facility_trans_from_chr, facility_trans_to_chr, 
-               episode_pd, mode_separation_chr,drg_mode_separation_chr, inpatient_outpatient, incriment_int, overlaps, item_no, overlaps_with, lag_dist, same_as_next, incriment, enctr)
+               episode_pd, episode_pd_extended, mode_separation_chr,drg_mode_separation_chr, incriment_int, overlaps, item_no, overlaps_with, lag_dist, same_as_next, incriment, enctr)
     
     
-    # the following loop runts the correction below the same number of times as their are rows. 
-    #This allows multiple checks of the correction to the encounter
+    # the following loop runs the correction below the same number of times as their are rows. 
+    #This allows multiple checks of the correction to the admission
     for (i in 1:nrow(apdc_enctr)) { 
       
       
@@ -281,13 +201,13 @@ make_encounters <- function(x) {
             
             z <- overlaps_with[x] #record the item it overlaps with
             
-            y <- apdc_enctr[[z,"enctr"]] # record the encounter of the overlapped item
+            y <- apdc_enctr[[z,"enctr"]] # record the admission of the overlapped item
             
-            apdc_enctr[x,"enctr"] <- y #assign that encounter to this row
+            apdc_enctr[x,"enctr"] <- y #assign that admission to this row
             
           } else { 
             
-            enctr[x] <- enctr[x] #if no overlap then the encounter remains the same 
+            enctr[x] <- enctr[x] #if no overlap then the admission remains the same 
             
           }
         }))
@@ -312,6 +232,9 @@ make_encounters <- function(x) {
       ungroup()
     
   }
+  
+  
+
   
   apdc_enctr_single <- map(ppn1, create_inpatient_outpatient) 
   
@@ -351,6 +274,10 @@ chunk_no=500
 out <- split(ppns, cut(seq_along(ppns),chunk_no,labels = FALSE))
 
 cycle_ppns <- 1:500
+
+#run the make_admissions function
+#set the time window
+window_hrs <- 24
 
 #run the make_encounters function
 apdc_enctr_list <- map(cycle_ppns, make_encounters)
