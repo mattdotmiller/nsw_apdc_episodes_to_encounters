@@ -59,7 +59,7 @@ This approach is consistent with the naming conventions outlined in [Vallmuur K
 
 This function takes each PPN and creates the encounters
 
-Line 280 pets you set the time window for which two sequential episodes can be considered part of the same encounter. 
+Line 280 lets you set the time window for which two sequential episodes can be considered part of the same encounter. 
 
  
 *   create a column that displays the time interval between an episode and the previous episode, in hours (called incriment\_int)
