@@ -14,6 +14,8 @@ updated 22 Aug 23
 
 _For the details of that project see:_ [https://osf.io/63qc7/](https://osf.io/63qc7/)
 
+For the accompanying journal article that used this script see: [https://doi.org/10.1016/j.injury.2024.111570](https://doi.org/10.1016/j.injury.2024.111570)
+
   
 
 **Overview**
